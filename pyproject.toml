@@ -1,0 +1,6 @@
+[package]
+name = "mmtools"
+version = "0.1.0"
+description = "mtools, but with more m"
+authors = ["Michael McClimon <michael@mcclimon.org>"]
+readme = "README.md"
