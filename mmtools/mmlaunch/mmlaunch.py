@@ -1,6 +1,6 @@
 import argparse
 import json
-import pathlib
+import os
 import re
 import sys
 import subprocess
@@ -31,10 +31,28 @@ class MMLaunch:
         topology = "sc" if opts.sc else "rs"
         target = "dst" if opts.dst else "src"
 
-        root = pathlib.Path.home().joinpath(".mlaunch")
-
+        root = util.MMTOOLS_HOME
         path = "-".join([topology, version, target])
-        print(root.joinpath(path), mongo_path)
+        mlaunch_dir = root.joinpath(path)
+
+        is_init = "init" in argv
+
+        mlaunch_args = [
+            *argv,
+            "--dir",
+            str(mlaunch_dir),
+            "--binarypath",
+            mongo_path,
+        ]
+
+        if is_init:
+            mlaunch_args.append("--replicaset" if topology == "rs" else "--sharded")
+
+        port = util.available_port_range()
+        print(port)
+
+        # print("exec: mlaunch " + " ".join(mlaunch_args))
+        # os.execvp("mlaunch", mlaunch_args)
 
     def find_mongo_path(self, want_version):
         if re.fullmatch(r"\d+\.\d+", want_version) is None:

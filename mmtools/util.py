@@ -1,4 +1,9 @@
 import argparse
+import json
+from pathlib import Path
+
+MMTOOLS_HOME = Path.home().joinpath(".mmtools")
+PORT_START = 27110
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -22,3 +27,27 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     )
 
     return
+
+
+# for ports: get all known environments, pick a free 15-port range
+def available_port_range() -> int:
+    # for every environment, read its port number out of the mlaunch startup
+    # file
+    ports_in_use = list(sorted(map(port_for_environment, known_environments())))
+    print(ports_in_use)
+    return 0
+
+
+def port_for_environment(envdir: Path) -> int:
+    with open(envdir.joinpath('.mlaunch_startup')) as f:
+        data = json.load(f)
+        return data['parsed_args']['port']
+
+
+def known_environments() -> list[Path]:
+    known = []
+    for d in MMTOOLS_HOME.iterdir():
+        if d.joinpath('.mlaunch_startup').is_file():
+            known.append(d)
+
+    return known
