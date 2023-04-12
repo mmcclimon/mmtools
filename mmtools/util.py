@@ -7,6 +7,8 @@ import subprocess
 import sys
 from typing import NoReturn
 
+from mmtools.environment import Environment
+
 MMTOOLS_HOME = Path.home().joinpath(".mmtools")
 PORT_START = 27110
 
@@ -51,9 +53,7 @@ def find_mongo_path(want_version) -> str:
             return have["path"]
 
     have = ", ".join(map(lambda v: v["name"], data))
-    exit(
-        f"could not find matching version for {want_version}\nhave: {have}"
-    )
+    exit(f"could not find matching version for {want_version}\nhave: {have}")
 
 
 def exit(msg, code: int = 1) -> NoReturn:
@@ -63,7 +63,7 @@ def exit(msg, code: int = 1) -> NoReturn:
 
 # for ports: get all known environments, pick a free 15-port range
 def available_port_range() -> int:
-    ports_in_use = set(map(port_for_environment, known_environments()))
+    ports_in_use = set(map(lambda e: e.starting_port(), known_environments()))
     for port in itertools.count(PORT_START, 15):
         if port not in ports_in_use:
             return port
@@ -71,16 +71,9 @@ def available_port_range() -> int:
     raise RuntimeError("could not find available port")
 
 
-def port_for_environment(envdir: Path) -> int:
-    with open(envdir.joinpath('.mlaunch_startup')) as f:
-        data = json.load(f)
-        return data['parsed_args']['port']
-
-
-def known_environments() -> list[Path]:
-    known = []
-    for d in MMTOOLS_HOME.iterdir():
-        if d.joinpath('.mlaunch_startup').is_file():
-            known.append(d)
-
-    return known
+def known_environments() -> list[Environment]:
+    return [
+        Environment(d)
+        for d in MMTOOLS_HOME.iterdir()
+        if d.joinpath(".mlaunch_startup").is_file()
+    ]
