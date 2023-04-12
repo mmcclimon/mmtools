@@ -36,9 +36,12 @@ class MMLaunch:
         ]
 
         if is_init:
-            mlaunch_args.append("--replicaset" if topology == "rs" else "--sharded")
             mlaunch_args.extend(["--binarypath", str(mongo_path)])
             mlaunch_args.extend(["--port", str(util.available_port_range())])
+            if topology == "rs":
+                mlaunch_args.append("--replicaset")
+            else:
+                mlaunch_args.extend(["--shards", "2", "--replicaset"])
 
         print("exec: " + " ".join(mlaunch_args))
         os.execvp("mlaunch", mlaunch_args)
