@@ -1,6 +1,15 @@
-[package]
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
 name = "mmtools"
-version = "0.1.0"
 description = "mtools, but with more m"
-authors = ["Michael McClimon <michael@mcclimon.org>"]
+authors = [{name = "Michael McClimon", email = "michael@mcclimon.org"}]
 readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version"]
+
+[project.scripts]
+mmlaunch = "mmtools.mmlaunch:run"

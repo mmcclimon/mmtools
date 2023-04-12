@@ -70,7 +70,3 @@ class MMLaunch:
         exit_with_msg(
             f"could not find matching version for {want_version}\nhave: {have}"
         )
-
-
-if __name__ == "__main__":
-    MMLaunch().run()
