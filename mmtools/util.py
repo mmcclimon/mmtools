@@ -1,4 +1,10 @@
 import argparse
+import json
+import itertools
+from pathlib import Path
+
+MMTOOLS_HOME = Path.home().joinpath(".mmtools")
+PORT_START = 27110
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -22,3 +28,28 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     )
 
     return
+
+
+# for ports: get all known environments, pick a free 15-port range
+def available_port_range() -> int:
+    ports_in_use = set(map(port_for_environment, known_environments()))
+    for port in itertools.count(PORT_START, 15):
+        if port not in ports_in_use:
+            return port
+
+    raise RuntimeError("could not find available port")
+
+
+def port_for_environment(envdir: Path) -> int:
+    with open(envdir.joinpath('.mlaunch_startup')) as f:
+        data = json.load(f)
+        return data['parsed_args']['port']
+
+
+def known_environments() -> list[Path]:
+    known = []
+    for d in MMTOOLS_HOME.iterdir():
+        if d.joinpath('.mlaunch_startup').is_file():
+            known.append(d)
+
+    return known
