@@ -2,6 +2,10 @@ import argparse
 import json
 import itertools
 from pathlib import Path
+import re
+import subprocess
+import sys
+from typing import NoReturn
 
 MMTOOLS_HOME = Path.home().joinpath(".mmtools")
 PORT_START = 27110
@@ -28,6 +32,33 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     )
 
     return
+
+
+def find_mongo_path(want_version) -> str:
+    if re.fullmatch(r"\d+\.\d+", want_version) is None:
+        exit("error parsing version: must be X.Y")
+
+    try:
+        ret = subprocess.run(
+            ["m", "installed", "--json"], check=False, capture_output=True
+        )
+        data = json.loads(ret.stdout)
+    except BaseException as err:
+        exit(f"error getting installed mongo versions from m: {err}")
+
+    for have in data:
+        if have["name"].startswith(want_version):
+            return have["path"]
+
+    have = ", ".join(map(lambda v: v["name"], data))
+    exit(
+        f"could not find matching version for {want_version}\nhave: {have}"
+    )
+
+
+def exit(msg, code: int = 1) -> NoReturn:
+    print(msg, file=sys.stderr)
+    sys.exit(code)
 
 
 # for ports: get all known environments, pick a free 15-port range
