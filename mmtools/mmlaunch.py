@@ -42,3 +42,7 @@ class MMLaunch:
 
         print("exec: " + " ".join(mlaunch_args))
         os.execvp("mlaunch", mlaunch_args)
+
+
+def run():
+    return MMLaunch().run()
